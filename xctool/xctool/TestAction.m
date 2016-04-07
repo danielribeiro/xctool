@@ -111,6 +111,10 @@
                          aliases:nil
                      description:@"Skip actual test running and list them only."
                          setFlag:@selector(setListTestsOnly:)],
+    [Action actionOptionWithName:@"listTestClassesOnly"
+                         aliases:nil
+                     description:@"Skip actual test running and list the test classes only"
+                         setFlag:@selector(setListTestClassesOnly:)],
     [Action actionOptionWithName:@"testTimeout"
                          aliases:nil
                      description:
@@ -192,6 +196,11 @@
 - (void)setListTestsOnly:(BOOL)listTestsOnly
 {
   [_runTestsAction setListTestsOnly:listTestsOnly];
+}
+
+- (void)setListTestClassesOnly:(BOOL)listTestClassesOnly
+{
+  [_runTestsAction setListTestClassesOnly:listTestClassesOnly];
 }
 
 - (void)setTestTimeout:(NSString *)testTimeout
