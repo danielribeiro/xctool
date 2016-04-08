@@ -855,7 +855,10 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
     if (_listTestClassesOnly) {
       if (testCases) {
         for (NSString *test in testCases) {
-          PublishEventToReporters(options.reporters, @{kReporter_Event_Key: @"list-target-class", @"className": test});
+          PublishEventToReporters(options.reporters, @{kReporter_Event_Key: @"list-target-class",
+                                                       @"className": test,
+                                                       @"targetName": info.testable.target
+                                                       });
         }
       }
       continue;
