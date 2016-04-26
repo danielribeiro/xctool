@@ -155,6 +155,8 @@
     }
 
     for (NSDictionary *testResult in suiteResults) {
+      NSString *aggregateFailureMessage = @"";
+
       // Creating a proper NSXMLElement testcase with attributes
       NSXMLElement *testcaseElement = [NSXMLElement elementWithName:@"testcase"];
       [testcaseElement setAttributes:@[[NSXMLNode attributeWithName:@"classname"
@@ -170,13 +172,15 @@
           NSString *failureValue = [NSString stringWithFormat:@"%@:%d",
                                     exception[kReporter_EndTest_Exception_FilePathInProjectKey],
                                     [exception[kReporter_EndTest_Exception_LineNumberKey] intValue]];
+          NSString *failureMessage = exception[kReporter_EndTest_Exception_ReasonKey];
           NSXMLElement *failureElement = [NSXMLElement elementWithName:@"failure"
                                                            stringValue:failureValue];
           [failureElement setAttributes:@[[NSXMLNode attributeWithName:@"type"
                                                            stringValue:@"Failure"],
                                           [NSXMLNode attributeWithName:@"message"
-                                                           stringValue:exception[kReporter_EndTest_Exception_ReasonKey]]]];
+                                                           stringValue:failureMessage]]];
           [testcaseElement addChild:failureElement];
+          aggregateFailureMessage = [aggregateFailureMessage stringByAppendingFormat:@"%@\n", failureMessage];
         }
 
         if ([testResult[kReporter_EndTest_ResultKey] isEqualToString:@"error"]) {
@@ -192,8 +196,9 @@
       if (output && output.length > 0) {
         // make sure we don't create an invalid junit.xml when stdout contains invalid UTF-8
         NSData *outputData = [output dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
-        [testcaseElement addChild:[NSXMLElement elementWithName:@"system-out"
-                                                    stringValue:[[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding]]];
+        NSString *systemOut = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
+        NSXMLNode *systemOutNode = [NSXMLElement elementWithName:@"system-out" stringValue:[NSString stringWithFormat:@"%@\n%@", systemOut, aggregateFailureMessage]];
+        [testcaseElement addChild:systemOutNode];
       }
 
       // Adding NSXMLElement testcase to NSXMLElement testsuite
