@@ -359,12 +359,6 @@
             ReferencedContainer = "container:xctool.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "&quot;-workspace&quot; &quot;/Users/jmartin/Development/mte/ios-builder-exemplar/IOS-Builder-Exemplar.xcworkspace&quot; &quot;-configuration&quot; &quot;Debug&quot; &quot;-scheme&quot; &quot;IOS-Builder-Exemplar&quot; &quot;-destination&quot; &quot;name=iPad Air,OS=9.2&quot; &quot;-derivedDataPath&quot; &quot;/tmp/ios-builder-exemplar&quot; &quot;-PBXBuildsContinueAfterErrors=0&quot; &quot;-sdk&quot; &quot;iphonesimulator&quot; &quot;test&quot; --waitForDebugger"
-            isEnabled = "YES">
-         </CommandLineArgument>
-      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
