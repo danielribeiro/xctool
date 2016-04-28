@@ -210,6 +210,10 @@ NSArray *BucketizeTestCasesByTestClass(NSArray *testCases, int bucketSize)
                      description:@"Add a path to an app test bundle with the path to its host app"
                        paramName:@"BUNDLE:HOST_APP"
                            mapTo:@selector(addAppTest:)],
+    [Action actionOptionWithName:@"waitForDebugger"
+                         aliases:nil
+                     description:@"Spawn tests but wait for debugger to attach."
+                         setFlag:@selector(setWaitForDebugger:)],
     ];
 }
 
@@ -685,6 +689,7 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
                                                              newSimulatorInstance:_newSimulatorInstance
                                                         noResetSimulatorOnFailure:_noResetSimulatorOnFailure
                                                                      freshInstall:_freshInstall
+                                                                  waitForDebugger:_waitForDebugger
                                                                       testTimeout:_testTimeout
                                                                         reporters:reporters
                                                                processEnvironment:[[NSProcessInfo processInfo] environment]];

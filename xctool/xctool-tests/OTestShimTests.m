@@ -121,6 +121,7 @@ static NSTask *OtestShimTask(NSString *platformName,
                                                                newSimulatorInstance:NO
                                                           noResetSimulatorOnFailure:NO
                                                                        freshInstall:NO
+                                                                    waitForDebugger:NO
                                                                         testTimeout:1
                                                                           reporters:@[]
                                                                  processEnvironment:@{}];
@@ -227,6 +228,11 @@ static NSDictionary *ExtractEvent(NSArray *events, NSString *eventType)
 }
 
 @implementation OTestShimTests
+
++ (void)setUp
+{
+  [SimulatorInfo prepare];
+}
 
 - (void)testSenTestingKitAssertionFailuresInIOSLogicTestsAreNotSilent
 {
