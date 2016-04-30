@@ -375,6 +375,52 @@ static void XCTestCase_performTest(id self, SEL sel, id arg1)
   XCPerformTestWithSuppressedExpectedAssertionFailures(self, originalSelector, arg1);
 }
 
+// Ported from https://github.com/specta/specta/blob/8f614d020500a3b4e35c16e1ce6ff11f35f3219c/Specta/Specta/SpectaUtility.m#L52
+static NSArray *XCT_shuffle(NSArray *array) {
+    NSMutableArray *shuffled = [array mutableCopy];
+    NSUInteger count = [shuffled count];
+    for (NSUInteger i = 0; i < count; i++) {
+        NSUInteger r = random() % count;
+        [shuffled exchangeObjectAtIndex:i withObjectAtIndex:r];
+    }
+    return shuffled;
+}
+
+static unsigned int XCT_seed() {
+    unsigned int seed = 0;
+    NSString *envSeed = [[[NSProcessInfo processInfo] environment] objectForKey:@"XCTOOL_SEED"];
+    if (envSeed) {
+        sscanf([envSeed UTF8String], "%u", &seed);
+    } else {
+        seed = arc4random();
+    }
+    srandom(seed);
+    return seed;
+}
+
+static NSArray * XCTestCase_allSubclasses(id self, SEL sel)
+{
+    SEL originalSelector = @selector(__XCTestCase_allSubclasses);
+    // Call through original implementation
+    NSArray *testClasses = objc_msgSend(self, originalSelector);
+    if (![[[[NSProcessInfo processInfo] environment] objectForKey:@"XCTOOL_SHUFFLE"] isEqualToString:@"1"]) {
+        return testClasses;
+    }
+    
+    unsigned int seed = XCT_seed();
+    NSString *message = [NSString stringWithFormat:@"==> Test class order seed is: %u", seed];
+    NSDictionary *status = @{
+                             kReporter_BeginStatus_MessageKey : message,
+                             kReporter_BeginStatus_LevelKey : @"Info"
+                             };
+    dispatch_sync(EventQueue(), ^{
+        PrintJSON(EventDictionaryWithNameAndContent(kReporter_Events_BeginStatus, status));
+        PrintJSON(EventDictionaryWithNameAndContent(kReporter_Events_EndStatus, status));
+    });
+    return XCT_shuffle(testClasses);
+}
+
+
 #pragma mark - _enableSymbolication
 static BOOL XCTestCase__enableSymbolication(id self, SEL sel)
 {
@@ -436,6 +482,7 @@ static const char *DyldImageStateChangeHandler(enum dyld_image_states state,
                                                uint32_t infoCount,
                                                const struct dyld_image_info info[])
 {
+
   for (uint32_t i = 0; i < infoCount; i++) {
     // Sometimes the image path will be something like...
     //   '.../SenTestingKit.framework/SenTestingKit'
@@ -493,6 +540,11 @@ static const char *DyldImageStateChangeHandler(enum dyld_image_states state,
       XTSwizzleSelectorForFunction(NSClassFromString(@"XCTestCase"),
                                    @selector(performTest:),
                                    (IMP)XCTestCase_performTest);
+      XTSwizzleClassSelectorForFunction(NSClassFromString(@"XCTestCase"),
+                                   @selector(allSubclasses),
+                                   (IMP)XCTestCase_allSubclasses);
+
+
       if ([NSClassFromString(@"XCTestCase") respondsToSelector:@selector(_enableSymbolication)]) {
         // Disable symbolication thing on xctest 7 because it sometimes takes forever.
         XTSwizzleClassSelectorForFunction(NSClassFromString(@"XCTestCase"),
@@ -504,7 +556,6 @@ static const char *DyldImageStateChangeHandler(enum dyld_image_states state,
                                 [frameworkInfo objectForKey:kTestingFrameworkTestSuiteClassName]);
     }
   }
-
   return NULL;
 }
 

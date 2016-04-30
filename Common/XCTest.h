@@ -170,6 +170,7 @@ struct __va_list_tag {
 - (id)initWithSelector:(SEL)arg1;
 - (id)initWithInvocation:(id)arg1;
 - (id)init;
+- (NSArray *)allSubclasses;
 
 @end
 
