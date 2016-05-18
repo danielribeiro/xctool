@@ -289,6 +289,7 @@ NSDictionary *LaunchTaskAndCaptureOutput(NSTask *task, NSString *description)
   return LaunchTaskAndCaptureOutputWithTimeoutAndRetry(task, description, 0.0f, 0);
 }
 
+// Working around deadlocks on xcodebuild. Cherry picked from: https://github.com/technology-ebay-de/xctool/commit/6290d227234d3f25d796f940f97ea08200757998
 NSDictionary *LaunchTaskAndCaptureOutputWithTimeoutAndRetry(NSTask *task, NSString *description, NSTimeInterval timeout, NSUInteger retry)
 {
   int stdoutPipefd[2];
