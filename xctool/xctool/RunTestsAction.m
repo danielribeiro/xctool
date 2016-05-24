@@ -859,10 +859,14 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
                                                      error:&filterError];
     if (_listTestClassesOnly) {
       if (testCases) {
+        PublishEventToReporters(options.reporters, @{kReporter_Event_Key: kReporter_Events_BeginOCUnit,
+                                                     kReporter_BeginOCUnit_TargetNameKey: info.testable.target
+                                                     });
         for (NSString *test in testCases) {
-          PublishEventToReporters(options.reporters, @{kReporter_Event_Key: @"list-target-class",
-                                                       @"className": test,
-                                                       @"targetName": info.testable.target
+          NSString *className = [[test componentsSeparatedByString: @"/"] firstObject];
+          PublishEventToReporters(options.reporters, @{kReporter_Event_Key: kReporter_Events_EndTest,
+                                                       kReporter_BeginTest_TestKey: test,
+                                                       kReporter_BeginTest_ClassNameKey: className
                                                        });
         }
       }
