@@ -865,9 +865,9 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
         for (NSString *test in testCases) {
           NSString *className = [[test componentsSeparatedByString: @"/"] firstObject];
           PublishEventToReporters(options.reporters, @{kReporter_Event_Key: kReporter_Events_EndTest,
-                                                       kReporter_BeginTest_TestKey: test,
-                                                       kReporter_BeginTest_ClassNameKey: className
-                                                       });
+                                                       kReporter_EndTest_TestKey: test,
+                                                       kReporter_EndTest_ClassNameKey:className,
+                                                       kReporter_EndTest_SucceededKey: @"1"});
         }
       }
       continue;
