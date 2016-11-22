@@ -34,6 +34,15 @@
 @interface Xcode3TargetProduct : Xcode3TargetBuildable
 @end
 
+
+@interface XCiPhoneSimulatorCodeSignContext: NSObject
+
+/// We're going to swizzle this to be a noop
++ (id)prepareForCodeSigningWithMacroExpansionScope:(id)arg1 certificateUtilities:(id)arg2;
+
+@end
+
+
 static NSArray *FilterBuildables(NSArray *buildables)
 {
   NSString *showOnlyBuildsettingsForTarget = [[NSProcessInfo processInfo] environment][@"SHOW_ONLY_BUILD_SETTINGS_FOR_TARGET"];
@@ -62,6 +71,11 @@ static id IDEBuildSchemeAction__uniquedBuildablesForBuildables_includingDependen
   return FilterBuildables(result);
 }
 
+static id XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope_certificateUtilities(id self, SEL sel, id arg1, BOOL arg2)
+{
+  return arg1;
+}
+
 __attribute__((constructor)) static void EntryPoint()
 {
   NSCAssert(NSClassFromString(@"IDEBuildSchemeAction") != NULL, @"Should have IDEBuildSchemeAction");
@@ -71,6 +85,26 @@ __attribute__((constructor)) static void EntryPoint()
   XTSwizzleClassSelectorForFunction(NSClassFromString(@"IDEBuildSchemeAction"),
                                @selector(_uniquedBuildablesForBuildables:includingDependencies:),
                                (IMP)IDEBuildSchemeAction__uniquedBuildablesForBuildables_includingDependencies);
+
+  // If we're in xcode 7.3.1 or 8.0.0, we have to work around a deadlock that occurs. This is done by making prepareForCodeSigningWithMacroExpansionScope:certificateUtilities: be a noop by returning the first argument
+  // This shouldn't be needed for listing build settings.
+
+
+  /// Load ide plugin bundle. It contains the method we're swizzling. It is not necessarily loaded at the time this library is loaded, so we have to manually load it
+  NSURL *pluginURL = [[NSBundle mainBundle] URLForResource:@"IDEiOSSupportCore" withExtension:@"ideplugin" subdirectory:@"../../../PlugIns"];
+  NSCAssert(pluginURL != nil, @"Must be able to load IDEiOSSupportCore plugin");
+
+  NSBundle *bundle = [NSBundle bundleWithURL:pluginURL];
+  NSCAssert(bundle != nil, @"Must be able to load IDEiOSSupportCore");
+  [bundle load];
+  NSCAssert(NSClassFromString(@"XCiPhoneSimulatorCodeSignContext") != NULL, @"Should have XCiPhoneSimulatorCodeSignContext");
+
+  // Xcode 5 and later will call this method several times as its
+  // collecting all the buildables.  We can filter the list each time.
+  XTSwizzleClassSelectorForFunction(NSClassFromString(@"XCiPhoneSimulatorCodeSignContext"),
+                                    @selector(prepareForCodeSigningWithMacroExpansionScope:certificateUtilities:),
+                                    (IMP)XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope_certificateUtilities);
+
 
   // Unset so we don't cascade into other process that get spawned from xcodebuild.
   unsetenv("DYLD_INSERT_LIBRARIES");
