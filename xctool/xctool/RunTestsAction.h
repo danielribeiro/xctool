@@ -61,6 +61,7 @@ typedef NS_ENUM(NSInteger, BucketBy) {
 @property (nonatomic, assign) BOOL failOnEmptyTestBundles;
 @property (nonatomic, assign) BOOL listTestsOnly;
 @property (nonatomic, assign) BOOL waitForDebugger;
+@property (nonatomic, assign) BOOL listTestClassesOnly;
 @property (nonatomic, copy) NSString *testSDK;
 @property (nonatomic, strong) NSMutableArray *onlyList;
 @property (nonatomic, strong) NSMutableArray *omitList;
