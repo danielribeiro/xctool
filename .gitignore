@@ -13,3 +13,5 @@ build
 .buckd
 buck-out
 buck-cache
+build.sh
+xctool_8.0.0/
