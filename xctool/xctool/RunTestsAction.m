@@ -185,6 +185,10 @@ NSArray *BucketizeTestCasesByTestClass(NSArray *testCases, int bucketSize)
                          aliases:nil
                      description:@"Skip actual test running and list them only."
                          setFlag:@selector(setListTestsOnly:)],
+    [Action actionOptionWithName:@"listTestClassesOnly"
+                         aliases:nil
+                     description:@"Skip actual test running and list the test classes only"
+                         setFlag:@selector(setListTestClassesOnly:)],
     [Action actionOptionWithName:@"targetedDeviceFamily"
                          aliases:nil
                      description:@"Target specific type of simulator when running tests (1=iPhone, 2=iPad, 4=Apple Watch)"
@@ -854,6 +858,22 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
                                              onlyTestCases:info.testable.onlyTests
                                           skippedTestCases:info.testable.skippedTests
                                                      error:&filterError];
+    if (_listTestClassesOnly) {
+      if (testCases) {
+        PublishEventToReporters(options.reporters, @{kReporter_Event_Key: kReporter_Events_BeginOCUnit,
+                                                     kReporter_BeginOCUnit_TargetNameKey: info.testable.target
+                                                     });
+        for (NSString *test in testCases) {
+          NSString *className = [[test componentsSeparatedByString: @"/"] firstObject];
+          PublishEventToReporters(options.reporters, @{kReporter_Event_Key: kReporter_Events_EndTest,
+                                                       kReporter_EndTest_TestKey: test,
+                                                       kReporter_EndTest_ClassNameKey:className,
+                                                       kReporter_EndTest_SucceededKey: @"1"});
+        }
+      }
+      continue;
+    }
+
     if (testCases == nil) {
       TestableBlock block = [self blockToAdvertiseMessage:filterError
                                  forTestableExecutionInfo:info
@@ -908,6 +928,10 @@ typedef BOOL (^TestableBlock)(NSArray *reporters);
 
       bucketCount++;
     }
+  }
+
+  if (_listTestClassesOnly) {
+    return YES;
   }
 
   __block BOOL succeeded = YES;

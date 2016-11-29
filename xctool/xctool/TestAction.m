@@ -113,6 +113,10 @@
                          aliases:nil
                      description:@"Skip actual test running and list them only."
                          setFlag:@selector(setListTestsOnly:)],
+    [Action actionOptionWithName:@"listTestClassesOnly"
+                         aliases:nil
+                     description:@"Skip actual test running and list the test classes only"
+                         setFlag:@selector(setListTestClassesOnly:)],
     [Action actionOptionWithName:@"waitForDebugger"
                          aliases:nil
                      description:@"Spawn tests but wait for debugger to attach."
@@ -203,6 +207,11 @@
 - (void)setListTestsOnly:(BOOL)listTestsOnly
 {
   [_runTestsAction setListTestsOnly:listTestsOnly];
+}
+
+- (void)setListTestClassesOnly:(BOOL)listTestClassesOnly
+{
+  [_runTestsAction setListTestClassesOnly:listTestClassesOnly];
 }
 
 - (void)setTestTimeout:(NSString *)testTimeout
