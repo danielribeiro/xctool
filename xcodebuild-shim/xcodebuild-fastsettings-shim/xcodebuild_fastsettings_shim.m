@@ -39,6 +39,7 @@
 
 /// We're going to swizzle this to be a noop
 + (id)prepareForCodeSigningWithMacroExpansionScope:(id)arg1 certificateUtilities:(id)arg2;
++ (id)prepareForCodeSigningWithMacroExpansionScope:(id)arg1;
 
 @end
 
@@ -73,6 +74,13 @@ static id IDEBuildSchemeAction__uniquedBuildablesForBuildables_includingDependen
 
 static id XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope_certificateUtilities(id self, SEL sel, id arg1, BOOL arg2)
 {
+  // [NSException raise:@"what1" format:@"bad method 1"];
+  return arg1;
+}
+
+static id XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope(id self, SEL sel, id arg1)
+{
+  // [NSException raise:@"what2" format:@"bad method 2"];
   return arg1;
 }
 
@@ -104,6 +112,9 @@ __attribute__((constructor)) static void EntryPoint()
   XTSwizzleClassSelectorForFunction(NSClassFromString(@"XCiPhoneSimulatorCodeSignContext"),
                                     @selector(prepareForCodeSigningWithMacroExpansionScope:certificateUtilities:),
                                     (IMP)XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope_certificateUtilities);
+  XTSwizzleClassSelectorForFunction(NSClassFromString(@"XCiPhoneSimulatorCodeSignContext"),
+                                    @selector(prepareForCodeSigningWithMacroExpansionScope),
+                                    (IMP)XCiPhoneSimulatorCodeSignContext__prepareForCodeSigningWithMacroExpansionScope);
 
 
   // Unset so we don't cascade into other process that get spawned from xcodebuild.
